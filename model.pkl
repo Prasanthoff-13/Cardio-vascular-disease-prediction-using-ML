@@ -1,0 +1,83 @@
+# train_model_unsupervised.py
+import pandas as pd
+import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import FastICA
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+from keras.models import Sequential
+from keras.layers import Dense
+import pickle
+
+# Load the dataset (example: Cleveland Heart Disease Dataset)
+url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/heart-disease.data'
+column_names = [
+    'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach', 'exang',
+    'oldpeak', 'slope', 'ca', 'thal', 'target'
+]
+df = pd.read_csv(url, header=None, names=column_names)
+df = df.dropna()
+
+# Define features and target
+X = df.drop(columns=['target'])
+y = df['target']
+
+# Standardize the data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Apply KMeans Clustering
+kmeans = KMeans(n_clusters=2, random_state=42)
+X_kmeans = kmeans.fit_predict(X_scaled)
+
+# Apply KNN
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_scaled, y)
+
+# Apply PCA (for dimensionality reduction)
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+# Apply ICA (Independent Component Analysis)
+ica = FastICA(n_components=2)
+X_ica = ica.fit_transform(X_scaled)
+
+# Build an Artificial Neural Network (ANN)
+ann_model = Sequential()
+ann_model.add(Dense(64, input_dim=X_scaled.shape[1], activation='relu'))
+ann_model.add(Dense(32, activation='relu'))
+ann_model.add(Dense(1, activation='sigmoid'))
+
+# Compile and train ANN model
+ann_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+ann_model.fit(X_scaled, y, epochs=10, batch_size=32)
+
+# Save the models
+with open('kmeans_model.pkl', 'wb') as f:
+    pickle.dump(kmeans, f)
+
+with open('knn_model.pkl', 'wb') as f:
+    pickle.dump(knn, f)
+
+with open('pca_model.pkl', 'wb') as f:
+    pickle.dump(pca, f)
+
+with open('ica_model.pkl', 'wb') as f:
+    pickle.dump(ica, f)
+
+ann_model.save('ann_model.h5')
+
+# Evaluate models' performance (Optional)
+y_pred_kmeans = kmeans.predict(X_scaled)
+y_pred_knn = knn.predict(X_scaled)
+y_pred_pca = (X_pca[:, 0] > 0).astype(int)  # simple thresholding
+y_pred_ica = (X_ica[:, 0] > 0).astype(int)  # simple thresholding
+y_pred_ann = (ann_model.predict(X_scaled) > 0.5).astype(int)
+
+print("KMeans Accuracy:", accuracy_score(y, y_pred_kmeans))
+print("KNN Accuracy:", accuracy_score(y, y_pred_knn))
+print("PCA Accuracy:", accuracy_score(y, y_pred_pca))
+print("ICA Accuracy:", accuracy_score(y, y_pred_ica))
+print("ANN Accuracy:", accuracy_score(y, y_pred_ann))
