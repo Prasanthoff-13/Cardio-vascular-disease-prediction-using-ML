@@ -1,0 +1,59 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardiovascular Disease Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Cardiovascular Disease Prediction</h2>
+
+        <form action="/predict" method="POST">
+            <label for="age">Age:</label>
+            <input type="text" name="age" required><br>
+
+            <label for="sex">Sex (1 = Male, 0 = Female):</label>
+            <input type="text" name="sex" required><br>
+
+            <label for="cp">Chest Pain Type (0-3):</label>
+            <input type="text" name="cp" required><br>
+
+            <label for="trestbps">Resting Blood Pressure:</label>
+            <input type="text" name="trestbps" required><br>
+
+            <label for="chol">Serum Cholesterol:</label>
+            <input type="text" name="chol" required><br>
+
+            <label for="fbs">Fasting Blood Sugar > 120 mg/dl (1 = True, 0 = False):</label>
+            <input type="text" name="fbs" required><br>
+
+            <label for="thalach">Maximum Heart Rate Achieved:</label>
+            <input type="text" name="thalach" required><br>
+
+            <label for="exang">Exercise Induced Angina (1 = Yes, 0 = No):</label>
+            <input type="text" name="exang" required><br>
+
+            <label for="oldpeak">Depression Induced by Exercise Relative to Rest:</label>
+            <input type="text" name="oldpeak" required><br>
+
+            <label for="slope">Slope of Peak Exercise ST Segment (0-2):</label>
+            <input type="text" name="slope" required><br>
+
+            <label for="ca">Number of Major Vessels (0-3):</label>
+            <input type="text" name="ca" required><br>
+
+            <label for="thal">Thalassemia (1 = Normal, 2 = Fixed Defect, 3 = Reversable Defect):</label>
+            <input type="text" name="thal" required><br>
+
+            <button type="submit">Predict</button>
+        </form>
+
+        {% if prediction_text %}
+        <h3>{{ prediction_text }}</h3>
+        {% endif %}
+    </div>
+</body>
+</html>
